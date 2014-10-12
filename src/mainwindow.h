@@ -23,6 +23,8 @@ private slots:
 
     void activateResult(QSharedPointer<Result> result);
 
+    void maybeHide();
+
 private:
     std::unique_ptr<ResultsFinder> resultsFinder;
     std::unique_ptr<ResultsCollection> resultsCollection;

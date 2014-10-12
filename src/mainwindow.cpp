@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     QAction* hideAction = new QAction(tr("Hide"), this);
     hideAction->setShortcut(QKeySequence(Qt::Key_Escape));
-    connect(hideAction, SIGNAL(triggered()), SLOT(hide()));
+    connect(hideAction, SIGNAL(triggered()), SLOT(maybeHide()));
     this->addAction(hideAction);
 
     QMetaObject::connectSlotsByName(this);
@@ -106,4 +106,10 @@ void MainWindow::activateResult(QSharedPointer<Result> result)
 #endif
 
     this->hide();
+}
+
+void MainWindow::maybeHide()
+{
+    if (this->view->escapeRequested())
+        this->hide();
 }

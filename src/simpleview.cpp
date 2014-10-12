@@ -66,6 +66,17 @@ SimpleView::SimpleView(ResultsCollection& resultsCollection, QWidget* parent) :
     connect(&this->resultsCollection, SIGNAL(resultAdded(QSharedPointer<Result>)), SLOT(addResult(QSharedPointer<Result>)));
 }
 
+bool SimpleView::escapeRequested()
+{
+    if (this->searchEdit->text().isEmpty())
+        return true;
+    else
+    {
+        this->searchEdit->setText("");
+        return false;
+    }
+}
+
 void SimpleView::clearList()
 {
     this->searchEdit->clear();

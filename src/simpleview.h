@@ -14,6 +14,8 @@ class SimpleView : public View
 public:
     explicit SimpleView(ResultsCollection& resultsCollection, QWidget* parent = 0);
 
+    virtual bool escapeRequested();
+
 signals:
 
 public slots:

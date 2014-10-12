@@ -14,6 +14,8 @@ public:
 
     virtual ~View() {}
 
+    virtual bool escapeRequested() { return true; }
+
 signals:
     void resultSelected(QSharedPointer<Result> result);
 

@@ -21,3 +21,8 @@ void ResultsCollection::addResult(WId winId, const QString& resultTitle)
 
     emit resultAdded(p);
 }
+
+const QSharedPointer<Result>& ResultsCollection::getResult(int index)
+{
+    return this->results[index];
+}

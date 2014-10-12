@@ -24,6 +24,8 @@ public slots:
 
     inline int getLength() const { return results.length(); }
 
+    const QSharedPointer<Result>& getResult(int index);
+
 private:
     QList<QSharedPointer<Result>> results;
 };

@@ -60,6 +60,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     QMetaObject::connectSlotsByName(this);
 
+    this->resize(640, 400);
+
     QTimer::singleShot(0, this, SLOT(resetResults()));  // TODO:  remove
 }
 
@@ -80,8 +82,22 @@ void MainWindow::activateResult(QSharedPointer<Result> result)
     HWND hwnd = (HWND)result->getWinId();
     if (IsWindow(hwnd))
     {
-        BringWindowToTop(hwnd);
-        SetForegroundWindow(hwnd);
+        if (IsIconic(hwnd))
+        {
+            WINDOWPLACEMENT wndpl;
+            if (GetWindowPlacement(hwnd, &wndpl))
+            {
+                if (wndpl.showCmd == SW_MAXIMIZE || wndpl.showCmd == SW_SHOWMAXIMIZED)
+                    PostMessage(hwnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+                else
+                    PostMessage(hwnd, WM_SYSCOMMAND, SC_RESTORE, 0);
+            }
+        }
+        else
+        {
+            BringWindowToTop(hwnd);
+            SetForegroundWindow(hwnd);
+        }
     }
     else
         qDebug() << "Handle is not a window: " << hwnd;

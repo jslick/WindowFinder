@@ -30,7 +30,7 @@ SimpleView::SimpleView(ResultsCollection& resultsCollection, QWidget* parent) :
     this->setLayout(this->mainLayout);
 
     // TODO:  reenable
-//    connect(this->searchEdit, SIGNAL(textChanged(QString)), SLOT(filterResults(QString)));
+    connect(this->searchEdit, SIGNAL(textChanged(QString)), SLOT(filterResults(QString)));
     connect(this->searchEdit, SIGNAL(returnPressed()), SLOT(selectCurrentResult()));
     this->mainLayout->addWidget(this->searchEdit);
 
@@ -88,13 +88,47 @@ void SimpleView::addResult(QSharedPointer<Result> result)
 
 void SimpleView::filterResults(QString text)
 {
-    std::vector<bool> matches(this->resultsCollection.getLength());
+    if (text.isEmpty())
+    {
+        for (int i = 0; i < this->resultsTable->rowCount(); i++)
+        {
+            this->resultsTable->showRow(i);
+            this->resultsTable->item(i, 0)->setText(i <= 9 ? QString::number(i + 1) : QString());
+        }
+        return;
+    }
+
+    std::vector<bool> matches(this->resultsCollection.getLength(), false);
 
     QStringList words = text.split(R"(\s+)", QString::SkipEmptyParts);
-    for (QString word : words)
+
+    for (int i = 0; i < this->resultsCollection.getLength(); i++)
     {
-        // each row:
-        // TODO
+        const QSharedPointer<Result>& result = this->resultsCollection.getResult(i);
+        for (const QString& word : words)
+        {
+            if (result->getResultTitle().contains(word, Qt::CaseInsensitive))
+            {
+                matches[i] = true;
+            }
+            else
+            {
+                matches[i] = false;
+                break;
+            }
+        }
+    }
+
+    int rownum = 0;
+    for (size_t i = 0; i < matches.size(); i++)
+    {
+        if (matches[i])
+        {
+            this->resultsTable->showRow(i);
+            this->resultsTable->item(i, 0)->setText(QString::number(++rownum));
+        }
+        else
+            this->resultsTable->hideRow(i);
     }
 }
 
@@ -116,7 +150,15 @@ void SimpleView::selectResult(int num)
     num--;
     if (num < 0)
         num = 9;
-    TableItem* resultItem = dynamic_cast<TableItem*>(this->resultsTable->item(num, 1));
-    if (resultItem)
-        emit resultSelected(resultItem->result);
+
+    QString numstr = QString::number(num + 1);
+    for (int i = num; i < this->resultsTable->rowCount(); i++)
+    {
+        if (this->resultsTable->item(i, 0)->text() == numstr)
+        {
+            TableItem* resultItem = dynamic_cast<TableItem*>(this->resultsTable->item(i, 1));
+            if (resultItem)
+                emit resultSelected(resultItem->result);
+        }
+    }
 }

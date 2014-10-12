@@ -9,6 +9,10 @@
 #include <QTableWidgetItem>
 #include <QHeaderView>
 
+static const int LABEL_COL = 0;
+static const int WINDOW_ICON_COL = 1;
+static const int WINDOW_TITLE_COL = 2;
+
 class TableItem : public QTableWidgetItem
 {
 public:
@@ -29,7 +33,6 @@ SimpleView::SimpleView(ResultsCollection& resultsCollection, QWidget* parent) :
 {
     this->setLayout(this->mainLayout);
 
-    // TODO:  reenable
     connect(this->searchEdit, SIGNAL(textChanged(QString)), SLOT(filterResults(QString)));
     connect(this->searchEdit, SIGNAL(returnPressed()), SLOT(selectCurrentResult()));
     this->mainLayout->addWidget(this->searchEdit);
@@ -38,8 +41,9 @@ SimpleView::SimpleView(ResultsCollection& resultsCollection, QWidget* parent) :
     this->resultsTable->setShowGrid(false);
     this->resultsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->resultsTable->setSelectionMode(QAbstractItemView::SingleSelection);
-    this->resultsTable->setColumnCount(2);
-    this->resultsTable->setColumnWidth(0, 20);
+    this->resultsTable->setColumnCount(3);
+    this->resultsTable->setColumnWidth(LABEL_COL, 20);
+    this->resultsTable->setColumnWidth(WINDOW_ICON_COL, 20);
     this->resultsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->resultsTable->horizontalHeader()->hide();
     this->resultsTable->horizontalHeader()->setStretchLastSection(true);
@@ -76,10 +80,17 @@ void SimpleView::addResult(QSharedPointer<Result> result)
     if (row < 10)
     {
         QTableWidgetItem* numItem = new QTableWidgetItem(QString::number(row < 9 ? row + 1 : 0));
-        this->resultsTable->setItem(row, 0, numItem);
+        this->resultsTable->setItem(row, LABEL_COL, numItem);
     }
+    else
+    {
+        this->resultsTable->setItem(row, LABEL_COL, new QTableWidgetItem);
+    }
+
+    this->resultsTable->setItem(row, WINDOW_ICON_COL, new QTableWidgetItem(result->getIcon(), ""));
+
     TableItem* item = new TableItem(result);
-    this->resultsTable->setItem(row, 1, item);
+    this->resultsTable->setItem(row, WINDOW_TITLE_COL, item);
 
     this->resultsTable->setRowHeight(row, 18);
     if (row == 0)
@@ -93,14 +104,14 @@ void SimpleView::filterResults(QString text)
         for (int i = 0; i < this->resultsTable->rowCount(); i++)
         {
             this->resultsTable->showRow(i);
-            this->resultsTable->item(i, 0)->setText(i <= 9 ? QString::number(i + 1) : QString());
+            this->resultsTable->item(i, LABEL_COL)->setText(i <= 9 ? QString::number(i + 1) : QString());
         }
         return;
     }
 
     std::vector<bool> matches(this->resultsCollection.getLength(), false);
 
-    QStringList words = text.split(R"(\s+)", QString::SkipEmptyParts);
+    QStringList words = text.split(QRegularExpression(R"(\s+)"), QString::SkipEmptyParts);
 
     for (int i = 0; i < this->resultsCollection.getLength(); i++)
     {
@@ -119,13 +130,14 @@ void SimpleView::filterResults(QString text)
         }
     }
 
-    int rownum = 0;
+    int rownum = 1;
     for (size_t i = 0; i < matches.size(); i++)
     {
         if (matches[i])
         {
             this->resultsTable->showRow(i);
-            this->resultsTable->item(i, 0)->setText(QString::number(++rownum));
+            if (rownum < 10)
+                this->resultsTable->item(i, LABEL_COL)->setText(QString::number(rownum++));
         }
         else
             this->resultsTable->hideRow(i);
@@ -154,9 +166,9 @@ void SimpleView::selectResult(int num)
     QString numstr = QString::number(num + 1);
     for (int i = num; i < this->resultsTable->rowCount(); i++)
     {
-        if (this->resultsTable->item(i, 0)->text() == numstr)
+        if (this->resultsTable->item(i, LABEL_COL)->text() == numstr)
         {
-            TableItem* resultItem = dynamic_cast<TableItem*>(this->resultsTable->item(i, 1));
+            TableItem* resultItem = dynamic_cast<TableItem*>(this->resultsTable->item(i, WINDOW_TITLE_COL));
             if (resultItem)
                 emit resultSelected(resultItem->result);
         }

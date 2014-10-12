@@ -5,6 +5,7 @@
 
 #ifdef Q_OS_WIN
 #  include <windows.h>
+#  include <QtWin>
 
 static BOOL CALLBACK findWindowsProc(HWND hwnd, LPARAM lParam)
 {
@@ -38,7 +39,20 @@ static BOOL CALLBACK findWindowsProc(HWND hwnd, LPARAM lParam)
         text[0] = 0;
         GetWindowTextW(hwnd, text, sizeof(text) / sizeof(text[0]));
         if (text[0])
-            resultsCollection.addResult((WId)hwnd, QString::fromWCharArray(text));
+        {
+            QPixmap icon;
+            LRESULT lr = SendMessage(hwnd, WM_GETICON, ICON_SMALL2, 0);
+            if (!lr)
+                lr = SendMessage(hwnd, WM_GETICON, ICON_BIG, 0);
+            if (!lr)
+                lr = GetClassLongPtrW(hwnd, GCL_HICONSM);
+            if (!lr)
+                lr = GetClassLongPtrW(hwnd, GCL_HICON);
+            if (lr)
+                icon = QtWin::fromHICON((HICON)lr);
+
+            resultsCollection.addResult((WId)hwnd, QString::fromWCharArray(text), icon);
+        }
     }
 
 

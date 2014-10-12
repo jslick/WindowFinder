@@ -4,7 +4,7 @@ Result::Result()
 {
 }
 
-Result::Result(WId winId, const QString& resultTitle)
-    : winId(winId), resultTitle(resultTitle)
+Result::Result(WId winId, const QString& resultTitle, QPixmap icon)
+    : winId(winId), resultTitle(resultTitle), icon(icon)
 {
 }

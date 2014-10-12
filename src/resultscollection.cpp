@@ -14,9 +14,9 @@ void ResultsCollection::resetResults()
     emit resultsReset();
 }
 
-void ResultsCollection::addResult(WId winId, const QString& resultTitle)
+void ResultsCollection::addResult(WId winId, const QString& resultTitle, QPixmap icon)
 {
-    QSharedPointer<Result> p(new Result(winId, resultTitle));
+    QSharedPointer<Result> p(new Result(winId, resultTitle, icon));
     this->results << p;
 
     emit resultAdded(p);

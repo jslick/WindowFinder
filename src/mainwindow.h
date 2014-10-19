@@ -19,8 +19,16 @@ public:
     MainWindow(QWidget* parent = 0);
     ~MainWindow();
 
+signals:
+    void closed(QCloseEvent* event);
+
 public slots:
     void bringToFront();
+
+    void showAbout();
+
+protected:
+    void closeEvent(QCloseEvent* event);
 
 private slots:
 

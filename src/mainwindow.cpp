@@ -1,10 +1,13 @@
 #include "mainwindow.h"
+#include "appcommon.h"
 
+#include "aboutdialog.h"
 #include "resultsfinder.h"
 #include "resultscollection.h"
 #include "simpleview.h"
 
 #include <UGlobalHotkey/uglobalhotkeys.h>
+#include <QPointer>
 #include <QApplication>
 #include <QAction>
 #include <QTimer>
@@ -23,7 +26,7 @@ MainWindow::MainWindow(QWidget* parent)
       resultsCollection(new ResultsCollection(nullptr)),
       view(new SimpleView(*this->resultsCollection, this))
 {
-    this->setWindowTitle("Window Finder");
+    this->setWindowTitle(APP_APPNAME);
     this->setWindowIcon(QIcon(":/app/app64.png"));
 
     {
@@ -63,6 +66,7 @@ MainWindow::MainWindow(QWidget* parent)
     QMenu* trayMenu = new QMenu(this);
     trayMenu->addAction(tr("Show"), this, SLOT(bringToFront()));
     trayMenu->addSeparator();
+    trayMenu->addAction(tr("About"), this, SLOT(showAbout()));
     trayMenu->addAction(tr("Exit"), this, SLOT(close()));
     trayMenu->setDefaultAction(trayMenu->actions().first());
     QSystemTrayIcon* trayIcon = new QSystemTrayIcon(this);
@@ -86,6 +90,23 @@ void MainWindow::bringToFront()
     this->activateWindow();
 
     this->resetResults();
+}
+
+void MainWindow::showAbout()
+{
+    static QPointer<AboutDialog> dlg;
+    if (!dlg)
+        dlg = new AboutDialog(this);
+
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->show();
+    dlg->raise();
+    dlg->activateWindow();
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    emit closed(event);
 }
 
 void MainWindow::resetResults()

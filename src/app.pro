@@ -17,6 +17,7 @@ INCLUDEPATH += ../contrib/
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    aboutdialog.cpp \
     result.cpp \
     resultscollection.cpp \
     resultsfinder.cpp \
@@ -24,7 +25,9 @@ SOURCES += \
     simpleview.cpp
 
 HEADERS += \
+    appcommon.h \
     mainwindow.h \
+    aboutdialog.h \
     result.h \
     resultscollection.h \
     resultsfinder.h \

@@ -117,6 +117,8 @@ void SimpleView::filterResults(QString text)
             this->resultsTable->showRow(i);
             this->resultsTable->item(i, LABEL_COL)->setText(i <= 9 ? QString::number(i + 1) : QString());
         }
+        if (this->resultsTable->rowCount())
+            this->resultsTable->selectRow(0);
         return;
     }
 
@@ -148,7 +150,11 @@ void SimpleView::filterResults(QString text)
         {
             this->resultsTable->showRow(i);
             if (rownum < 10)
-                this->resultsTable->item(i, LABEL_COL)->setText(QString::number(rownum++));
+                this->resultsTable->item(i, LABEL_COL)->setText(QString::number(rownum));
+            if (rownum == 1)
+                this->resultsTable->selectRow(i);
+
+            rownum++;
         }
         else
             this->resultsTable->hideRow(i);
@@ -177,7 +183,7 @@ void SimpleView::selectResult(int num)
     QString numstr = QString::number(num + 1);
     for (int i = num; i < this->resultsTable->rowCount(); i++)
     {
-        if (this->resultsTable->item(i, LABEL_COL)->text() == numstr)
+        if (!this->resultsTable->isRowHidden(i) && this->resultsTable->item(i, LABEL_COL)->text() == numstr)
         {
             TableItem* resultItem = dynamic_cast<TableItem*>(this->resultsTable->item(i, WINDOW_TITLE_COL));
             if (resultItem)

@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     QMetaObject::connectSlotsByName(this);
 
-    this->resize(640, 400);
+    this->resize(640, 640);
 
     QTimer::singleShot(0, this, SLOT(resetResults()));  // TODO:  remove
 }
@@ -78,6 +78,8 @@ void MainWindow::resetResults()
 
 void MainWindow::activateResult(QSharedPointer<Result> result)
 {
+    this->hide();
+
 #ifdef Q_OS_WIN
     HWND hwnd = (HWND)result->getWinId();
     if (IsWindow(hwnd))
@@ -93,19 +95,24 @@ void MainWindow::activateResult(QSharedPointer<Result> result)
                     PostMessage(hwnd, WM_SYSCOMMAND, SC_RESTORE, 0);
             }
         }
-        else
+
+        // Put in timeout so that PostMessage (if iconic) will happen first
+        // (NOTE:  This probably still races, but to a lesser degree)
+        QTimer* timer = new QTimer(this);
+        timer->setSingleShot(true);
+        connect(timer, &QTimer::timeout, [hwnd,timer]()
         {
             BringWindowToTop(hwnd);
             SetForegroundWindow(hwnd);
-        }
+            timer->deleteLater();
+        });
+        timer->start(260);
     }
     else
         qDebug() << "Handle is not a window: " << hwnd;
 #else
 #  error "Not implemented"
 #endif
-
-    this->hide();
 }
 
 void MainWindow::maybeHide()

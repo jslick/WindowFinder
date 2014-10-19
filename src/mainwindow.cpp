@@ -5,8 +5,10 @@
 #include "simpleview.h"
 
 #include <UGlobalHotkey/uglobalhotkeys.h>
+#include <QApplication>
 #include <QAction>
 #include <QTimer>
+#include <QDesktopWidget>
 #include <QDebug>
 #ifdef Q_OS_WIN
 #  include <windows.h>
@@ -61,13 +63,13 @@ MainWindow::MainWindow(QWidget* parent)
     QMetaObject::connectSlotsByName(this);
 
     this->resize(640, 640);
+    this->move(QApplication::desktop()->screen()->rect().center() - this->rect().center());
 
     QTimer::singleShot(0, this, SLOT(resetResults()));  // TODO:  remove
 }
 
 MainWindow::~MainWindow()
 {
-
 }
 
 void MainWindow::resetResults()

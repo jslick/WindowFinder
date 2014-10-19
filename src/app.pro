@@ -31,5 +31,14 @@ HEADERS += \
     view.h \
     simpleview.h
 
-# TODO:
-LIBS += -L$$OUT_PWD/../contrib/UGlobalHotkey/debug/ -lUGlobalHotkey
+win32 {
+    CONFIG(debug, debug|release) {
+        LIBS += -L$$OUT_PWD/../contrib/UGlobalHotkey/debug/ -lUGlobalHotkey
+    }
+    else {
+        LIBS += -L$$OUT_PWD/../contrib/UGlobalHotkey/release/ -lUGlobalHotkey
+    }
+}
+else {
+    LIBS += -L$$OUT_PWD/../contrib/UGlobalHotkey/ -lUGlobalHotkey
+}

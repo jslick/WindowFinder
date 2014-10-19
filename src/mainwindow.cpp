@@ -9,6 +9,7 @@
 #include <QAction>
 #include <QTimer>
 #include <QDesktopWidget>
+#include <QMenu>
 #include <QDebug>
 #ifdef Q_OS_WIN
 #  include <windows.h>
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget* parent)
       view(new SimpleView(*this->resultsCollection, this))
 {
     this->setWindowTitle("Window Finder");
+    this->setWindowIcon(QIcon(":/app/app64.png"));
 
     {
         Qt::WindowFlags flags = this->windowFlags();
@@ -46,14 +48,7 @@ MainWindow::MainWindow(QWidget* parent)
         qDebug() << "Unable to register hotkey: " << e.what();
     }
 
-    connect(hotkeyManager, &UGlobalHotkeys::activated, [this](size_t /*id*/)
-    {
-        this->show();
-        this->raise();
-        this->activateWindow();
-
-        this->resetResults();
-    });
+    connect(hotkeyManager, SIGNAL(activated(size_t)), SLOT(bringToFront()));
 
     QAction* hideAction = new QAction(tr("Hide"), this);
     hideAction->setShortcut(QKeySequence(Qt::Key_Escape));
@@ -65,11 +60,32 @@ MainWindow::MainWindow(QWidget* parent)
     this->resize(640, 640);
     this->move(QApplication::desktop()->screen()->rect().center() - this->rect().center());
 
-    QTimer::singleShot(0, this, SLOT(resetResults()));  // TODO:  remove
+    QMenu* trayMenu = new QMenu(this);
+    trayMenu->addAction(tr("Show"), this, SLOT(bringToFront()));
+    trayMenu->addSeparator();
+    trayMenu->addAction(tr("Exit"), this, SLOT(close()));
+    trayMenu->setDefaultAction(trayMenu->actions().first());
+    QSystemTrayIcon* trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setIcon(this->windowIcon());
+    trayIcon->setContextMenu(trayMenu);
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            SLOT(handleTray(QSystemTrayIcon::ActivationReason)));
+    trayIcon->show();
+
+    QTimer::singleShot(0, this, SLOT(resetResults()));
 }
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::bringToFront()
+{
+    this->show();
+    this->raise();
+    this->activateWindow();
+
+    this->resetResults();
 }
 
 void MainWindow::resetResults()
@@ -121,4 +137,17 @@ void MainWindow::maybeHide()
 {
     if (this->view->escapeRequested())
         this->hide();
+}
+
+void MainWindow::handleTray(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason)
+    {
+    case QSystemTrayIcon::Trigger:
+        this->bringToFront();
+        break;
+
+    default:
+        break;
+    }
 }

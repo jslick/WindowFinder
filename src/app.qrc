@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/app">
+        <file alias="app64.png">res/app64.png</file>
+    </qresource>
+</RCC>

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSystemTrayIcon>
 
 #include <memory>
 
@@ -18,12 +19,18 @@ public:
     MainWindow(QWidget* parent = 0);
     ~MainWindow();
 
+public slots:
+    void bringToFront();
+
 private slots:
+
     void resetResults();
 
     void activateResult(QSharedPointer<Result> result);
 
     void maybeHide();
+
+    void handleTray(QSystemTrayIcon::ActivationReason reason);
 
 private:
     std::unique_ptr<ResultsFinder> resultsFinder;

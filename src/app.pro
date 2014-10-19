@@ -31,6 +31,9 @@ HEADERS += \
     view.h \
     simpleview.h
 
+RESOURCES += \
+    app.qrc
+
 win32 {
     CONFIG(debug, debug|release) {
         LIBS += -L$$OUT_PWD/../contrib/UGlobalHotkey/debug/ -lUGlobalHotkey
